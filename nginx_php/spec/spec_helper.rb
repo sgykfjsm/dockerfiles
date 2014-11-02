@@ -5,6 +5,12 @@ require 'docker'
 
 set :backend, :ssh
 
+RSpec.configure do |config|
+  config.expect_with :rspec do |c|
+    c.syntax = [:should, :expect]
+  end
+end
+
 if ENV['ASK_SUDO_PASSWORD']
   begin
     require 'highline/import'
@@ -41,3 +47,4 @@ set :ssh_options, options
 # set :path, '/sbin:/usr/local/sbin:$PATH'
 
 Docker.url = 'tcp://192.168.56.102:5432'
+

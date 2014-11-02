@@ -21,19 +21,43 @@ RUN echo "nameserver 8.8.8.8" >> /etc/resolvconf/resolv.conf.d/base
 # if your region is not Tokyo, remove ADD line.
 ADD jp.sources.list /etc/apt/sources.list
 RUN apt-get -qq update && apt-get -qq -y upgrade \
-      && apt-get -qq -y install python-software-properties software-properties-common \
+      && apt-get -y install \
+      python-software-properties \
+      software-properties-common \
+      --no-install-recommends \
       && add-apt-repository ppa:nginx/stable
 
 # install
 RUN apt-get -qq update && apt-get -qq -y upgrade \
-      && apt-get -qq -y install \
+      && apt-get -y install \
       nginx \
       monit \
+      --no-install-recommends
+
+# monit
+ADD etc_monit_conf.d_monit.conf /etc/monit/conf.d/monit.conf
+ADD etc_monit_conf.d_nginx.conf /etc/monit/conf.d/nginx.conf
+ADD etc_monit_conf.d_php5fpm.conf /etc/monit/conf.d/php5fpm.conf
+RUN mkdir -m 755 -p /var/log/monit \
+      && sed -i -e "s/%CONTAINER_NAME%/${APP_CONTAINER_NAME}/g" /etc/monit/conf.d/monit.conf
+
+# nginx
+RUN rm -rf /etc/nginx/sites-available \
+      && mkdir -p /etc/nginx/sites-available \
+      && rm -f /usr/share/nginx/html/index.html
+ADD etc_nginx_nginx.conf /etc/nginx/nginx.conf
+ADD etc_nginx_sites-available_app1 /etc/nginx/sites-available/app1
+ADD usr_share_nginx_html_index.html /usr/share/nginx/html/index.html
+RUN sed -i -e "s/%CONTAINER_NAME%/${APP_CONTAINER_NAME}/g" /etc/nginx/sites-available/app1
+
+# install
+RUN apt-get -qq update && apt-get -qq -y upgrade \
+      && apt-get -y install \
       re2c \
       php5 \
       php5-cli \
       php5-fpm \
-      php5-mysql \
+      php5-mysqlnd \
       php5-odbc \
       php5-pgsql \
       php5-sqlite \
@@ -54,7 +78,6 @@ RUN apt-get -qq update && apt-get -qq -y upgrade \
       mcrypt \
       php5-mcrypt \
       uuid-dev \
-      && apt-get -qq -y install php5-mysqlnd \
       && pecl -q install uuid igbinary \
       && mkdir -p /tmp/apt-get-source/ \
       && cd $_ \
@@ -64,26 +87,16 @@ RUN apt-get -qq update && apt-get -qq -y upgrade \
       && ./configure -q \
       && make \
       && make install
-RUN echo '# from Dockerfile\nexpose_php = Off\nhtml_errors = Off\nvariables_order = "EGPCS"\nsession.save_path = "/tmp"\ndefault_socket_timeout = 90\npost_max_size = 32M\nshort_open_tag = 1\ndate.timezone = UTC\n' >> /etc/php5/fpm/php.ini \
-      && echo '<?php\nphpinfo();\n' > /usr/share/nginx/html/index.php
+
+# php
+ADD usr_share_nginx_html_index.php /usr/share/nginx/html/index.php
+ADD etc_php5_fpm_php.ini /tmp/php.ini
 ADD etc_php5_fpm_pool.d_www.conf /etc/php5/fpm/pool.d/www.conf
+RUN cat /tmp/php.ini >> /etc/php5/fpm/php.ini && rm -f /tmp/php.ini
 # ADD amzn_t1_micro_php55d.tar.gz /var/tmp/
-
-# monit
-ADD etc_monit_conf.d_monit.conf /etc/monit/conf.d/monit.conf
-ADD etc_monit_conf.d_nginx.conf /etc/monit/conf.d/nginx.conf
-RUN mkdir -m 755 -p /var/log/monit \
-      && sed -i -e "s/%CONTAINER_NAME%/${APP_CONTAINER_NAME}/g" /etc/monit/conf.d/monit.conf \
-      && sed -i -e "s/%CONTAINER_NAME%/${APP_CONTAINER_NAME}/g" /etc/monit/conf.d/nginx.conf
-
-# nginx
-RUN mkdir -p /etc/nginx/sites-available
-ADD etc_nginx_nginx.conf /etc/nginx/nginx.conf
-ADD etc_nginx_sites-available_app1 /etc/nginx/sites-available/app1
-RUN sed -i -e "s/%CONTAINER_NAME%/${APP_CONTAINER_NAME}/g" /etc/nginx/sites-available/app1
 
 # finish
 RUN apt-get autoclean && apt-get clean && rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*
-RUN /etc/init.d/php5-fpm start \
-    && /etc/init.d/nginx start
+RUN /etc/init.d/nginx start
+RUN /etc/init.d/php5-fpm start
 CMD ["/usr/bin/monit", "-I", "-c", "/etc/monit/monitrc"]
