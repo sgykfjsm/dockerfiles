@@ -21,7 +21,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     t.vm.network :private_network, ip: "192.168.56.101"
     t.vm.provider "virtualbox" do |v|
       v.customize ["modifyvm", :id, "--memory", 512]
-      v.name = "docker_tdd"
+      v.name = "nginx_simple"
     end
     # t.vm.synced_folder "share", "/vagrant_data"
     t.vm.provision :shell, :path => "./setup.sh"
