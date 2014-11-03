@@ -1,0 +1,31 @@
+server {
+    listen       80;
+    server_name  _;
+
+    location / {
+        try_files $uri $uri/ /index.php
+        root   /usr/share/nginx/html;
+        index  index.php;
+    }
+
+    access_log /var/log/nginx/%CONTAINER_NAME%_access.log;
+    error_log /var/log/nginx/%CONTAINER_NAME%_error.log;
+
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /usr/share/nginx/html;
+    }
+
+    location ~ \.php$ {
+        root           /usr/share/nginx/html;
+        fastcgi_pass   unix:/var/run/php5-fpm.sock;
+        fastcgi_index  index.php;
+        fastcgi_param  SCRIPT_FILENAME  /usr/share/nginx/html/$fastcgi_script_name;
+        include        fastcgi_params;
+    }
+
+    location ~ /\.ht {
+        deny  all;
+    }
+}
+

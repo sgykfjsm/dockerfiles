@@ -19,8 +19,8 @@ docker_opts="-H :5432"
 docker_cmd="${docker_cmd} ${docker_opts}"
 docker_share_dir=/opt/docker # on docker host
 docker_repository_name=sgykfjsm
-data_container_name=data1
-app_container_name=app1
+data_container_name=base_ubuntu
+app_container_name=php5fpm
 
 #
 rake_cmd=$(which rake)
@@ -38,19 +38,19 @@ done
 
 echo "Build docker image(${data_container_name}):"
 ${ssh_cmd} ${vagrant_hostname} \
-    "${docker_cmd} build -t ${docker_repository_name}/${data_container_name} /vagrant/docker/data1/."
+    "${docker_cmd} pull ${docker_repository_name}/${data_container_name}"
 echo
 
 echo "Build docker image(${app_container_name}):"
 ${ssh_cmd} ${vagrant_hostname} \
-    "${docker_cmd} build -t ${docker_repository_name}/${app_container_name} /vagrant/docker/nginx/."
+    "${docker_cmd} build -t ${docker_repository_name}/${app_container_name} /vagrant/docker/php5fpm/."
 echo
 
 echo "Run container:"
 ${ssh_cmd} ${vagrant_hostname} <<EOF
 sudo rm -rf ${docker_share_dir}/${data_container_name}
 sudo mkdir -m 755 -p \
-    ${docker_share_dir}/${data_container_name}/var/log/{nginx,monit}
+    ${docker_share_dir}/${data_container_name}/var/log/{php,monit}
 
 # data container
 ${docker_cmd} run -i -d -t -P \
@@ -59,10 +59,9 @@ ${docker_cmd} run -i -d -t -P \
     -v /etc/localtime:/etc/localtime:ro \
     ${docker_repository_name}/${data_container_name}
 
-# application container
+# php container
 ${docker_cmd} run -i -d -t \
     -p 12812:2812 \
-    -p 10080:80 \
     --name ${app_container_name} \
     --volumes-from ${data_container_name} \
     -v /etc/localtime:/etc/localtime:ro \
@@ -77,26 +76,26 @@ ${rake_cmd} spec
 echo
 
 set -e
-echo "Backup data container:"
-${ssh_cmd} ${vagrant_hostname} " \
-    ${docker_cmd} run --rm \
-        --volumes-from ${data_container_name} \
-        -v /tmp/:/backup \
-        ubuntu:14.04 \
-        tar zcf /backup/$(date '+%Y%m%d%H%M%S.%Z')_backup.tar /var/log \
-"
-
-echo "Delete container:"
-
-for cid in $(${ssh_cmd} ${vagrant_hostname} "${docker_cmd} ps -a -q --no-trunc")
-do
-    echo ${cid}
-    ${ssh_cmd} ${vagrant_hostname} " \
-        ${docker_cmd} stop ${cid} > /dev/null \
-        && ${docker_cmd} rm ${cid} > /dev/null \
-        && sudo rm -rf ${docker_share_dir}/${data_container_name} \
-    "
-done
+# echo "Backup data container:"
+# ${ssh_cmd} ${vagrant_hostname} " \
+#     ${docker_cmd} run --rm \
+#         --volumes-from ${data_container_name} \
+#         -v /tmp/:/backup \
+#         ubuntu:14.04 \
+#         tar zcf /backup/$(date '+%Y%m%d%H%M%S.%Z')_backup.tar /var/log \
+# "
+#
+# echo "Delete container:"
+#
+# for cid in $(${ssh_cmd} ${vagrant_hostname} "${docker_cmd} ps -a -q --no-trunc")
+# do
+#     echo ${cid}
+#     ${ssh_cmd} ${vagrant_hostname} " \
+#         ${docker_cmd} stop ${cid} > /dev/null \
+#         && ${docker_cmd} rm ${cid} > /dev/null \
+#         && sudo rm -rf ${docker_share_dir}/${data_container_name} \
+#     "
+# done
 
 rm -f ${ssh_config_to_vagrant}
 exit
