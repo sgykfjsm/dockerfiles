@@ -19,10 +19,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.cache.auto_detect = true
   config.vm.define :trusty do |t|
     t.vm.hostname = "trusty"
-    t.vm.network :private_network, ip: "192.168.56.102"
+    t.vm.network :private_network, ip: "192.168.56.104"
     t.vm.provider "virtualbox" do |v|
-      v.customize ["modifyvm", :id, "--memory", 512]
-      v.name = "ruby"
+      v.customize ["modifyvm", :id, "--memory", 2048]
+      v.name = "docker_td"
     end
     # t.vm.synced_folder "share", "/vagrant_data"
     t.vm.provision :shell, :path => "./setup.sh"

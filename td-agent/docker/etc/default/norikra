@@ -1,0 +1,8 @@
+XMX=1g
+XMS=1g
+XMN=256m
+NORIKRA_LEVEL=micro
+NORIKRA_DIR=/opt/norikra
+RUBY_VERSION=$(env | grep -i ruby_version | cut -d"=" -f2)
+JRUBY_VERSION=$(env | grep -i jruby_version | cut -d"=" -f2)
+

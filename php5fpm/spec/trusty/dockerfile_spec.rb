@@ -16,20 +16,8 @@ describe "sgykfjsm/php5fpm Images" do
     expect(@image).not_to be_nil
   end
 
-  it "should have environmental DEBIAN_FRONTEND" do
-    expect(@image.json["Config"]["Env"]).to include("DEBIAN_FRONTEND=noninteractive")
-  end
-
   it "should have environmental CONTAINER_NAME" do
     expect(@image.json["Config"]["Env"]).to include("CONTAINER_NAME=php5fpm")
-  end
-
-  it "should have environmental LANG" do
-    expect(@image.json["Config"]["Env"]).to include("LANG=en_US.UTF-8")
-  end
-
-  it "should have environmental LC_ALL" do
-    expect(@image.json["Config"]["Env"]).to include("LC_ALL=en_US.UTF-8")
   end
 
   it "should expose http port(monit)" do
@@ -213,7 +201,7 @@ describe command("docker -H ':5432' exec php5fpm php5-fpm -i") do
       'default_socket_timeout => 90 => 90',
       'short_open_tag => On => On',
       'date.timezone => UTC => UTC',
-      'error_log => /var/log/php/php5-fpm.log => /var/log/php/php5-fpm.log'
+      'error_log => /var/log/php5-fpm-error.log => /var/log/php5-fpm-error.log'
   }
 
 end

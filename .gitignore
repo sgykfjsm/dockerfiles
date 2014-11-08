@@ -40,3 +40,5 @@ build/
 ### Vagrant ###
 .vagrant/
 
+### Mac ###
+.DS_Store

@@ -1,0 +1,89 @@
+#!/bin/bash
+
+set -eu
+
+#
+vagrant_cmd=$(which vagrant)
+vagrant_hostname=dockerfile_jruby
+
+#
+ssh_cmd=$(which ssh)
+ssh_config_to_vagrant=$(pwd)/.ssh_config
+${vagrant_cmd} ssh-config --host ${vagrant_hostname} > ${ssh_config_to_vagrant}
+ssh_opts="-F ${ssh_config_to_vagrant} -q"
+ssh_cmd="${ssh_cmd} ${ssh_opts}"
+
+#
+docker_cmd=$(ssh -F ${ssh_config_to_vagrant} ${vagrant_hostname} 'which docker')
+docker_opts="-H :5432"
+docker_cmd="${docker_cmd} ${docker_opts}"
+docker_share_dir=/opt/docker # on docker host
+docker_repository_name=sgykfjsm
+base_container_name=base_ubuntu
+app_container_name=jruby
+
+#
+rake_cmd=$(which rake)
+
+echo "Initialize:"
+for cid in $(${ssh_cmd} ${vagrant_hostname} "${docker_cmd} ps -a -q --no-trunc")
+do
+    echo ${cid}
+    ${ssh_cmd} ${vagrant_hostname} " \
+        ${docker_cmd} stop ${cid} > /dev/null \
+        && ${docker_cmd} rm ${cid} > /dev/null \
+    "
+done
+
+for cn in ${app_container_name}
+do
+    dockerfile=
+    case "${cn}" in
+        "jruby" )
+            dockerfile="/vagrant/docker/."
+            ;;
+        * )
+            echo "unknown container name: ${cn}" >&2
+            exit 1
+            ;;
+    esac
+
+    echo "Build docker image(${cn}):"
+    ${ssh_cmd} ${vagrant_hostname} \
+        "${docker_cmd} build -t ${docker_repository_name}/${cn} ${dockerfile}"
+    echo
+done
+
+
+echo "Run container:"
+${ssh_cmd} ${vagrant_hostname} <<EOF
+echo -n "application container: "
+${docker_cmd} run -i -d -t \
+    --name ${app_container_name} \
+    -v /etc/localtime:/etc/localtime:ro \
+    ${docker_repository_name}/${app_container_name} \
+    /bin/bash
+EOF
+
+sleep 10
+
+set +e
+echo "Run rspec test:"
+${rake_cmd} spec
+echo
+
+
+set -e
+# echo "Delete container:"
+#
+# for cid in $(${ssh_cmd} ${vagrant_hostname} "${docker_cmd} ps -a -q --no-trunc")
+# do
+#     echo ${cid}
+#     ${ssh_cmd} ${vagrant_hostname} " \
+#         ${docker_cmd} stop ${cid} > /dev/null \
+#         && ${docker_cmd} rm ${cid} > /dev/null \
+#     "
+# done
+#
+rm -f ${ssh_config_to_vagrant}
+exit
