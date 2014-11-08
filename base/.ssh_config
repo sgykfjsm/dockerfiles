@@ -1,7 +1,7 @@
-Host ruby
+Host docker_tdd
   HostName 127.0.0.1
   User vagrant
-  Port 2202
+  Port 2222
   UserKnownHostsFile /dev/null
   StrictHostKeyChecking no
   PasswordAuthentication no

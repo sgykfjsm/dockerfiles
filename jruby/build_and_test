@@ -74,16 +74,16 @@ echo
 
 
 set -e
-# echo "Delete container:"
-#
-# for cid in $(${ssh_cmd} ${vagrant_hostname} "${docker_cmd} ps -a -q --no-trunc")
-# do
-#     echo ${cid}
-#     ${ssh_cmd} ${vagrant_hostname} " \
-#         ${docker_cmd} stop ${cid} > /dev/null \
-#         && ${docker_cmd} rm ${cid} > /dev/null \
-#     "
-# done
-#
+echo "Delete container:"
+
+for cid in $(${ssh_cmd} ${vagrant_hostname} "${docker_cmd} ps -a -q --no-trunc")
+do
+    echo ${cid}
+    ${ssh_cmd} ${vagrant_hostname} " \
+        ${docker_cmd} stop ${cid} > /dev/null \
+        && ${docker_cmd} rm ${cid} > /dev/null \
+    "
+done
+
 rm -f ${ssh_config_to_vagrant}
 exit

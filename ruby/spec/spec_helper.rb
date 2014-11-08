@@ -46,5 +46,5 @@ set :ssh_options, options
 # Set PATH
 # set :path, '/sbin:/usr/local/sbin:$PATH'
 
-Docker.url = 'tcp://192.168.56.103:5432'
+Docker.url = 'tcp://192.168.56.105:5432'
 

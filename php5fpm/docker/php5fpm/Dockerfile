@@ -8,32 +8,32 @@ ENV CONTAINER_NAME php5fpm
 EXPOSE 2812
 
 # install
-RUN apt-get -qq update && apt-get -qq -y upgrade \
-      && apt-get -y install monit \
-      re2c \
+RUN apt-get -qq update && apt-get -y install \
+      liboauth-php \
+      libssh2-php \
+      mcrypt \
+      monit \
+      php-aws-sdk \
       php5 \
+      php5-apcu \
       php5-cli \
+      php5-dev \
       php5-fpm \
+      php5-gd \
+      php5-imagick \
+      php5-intl \
+      php5-mcrypt \
+      php5-mcrypt \
+      php5-memcache \
+      php5-memcached \
       php5-mysqlnd \
+      php5-oauth \
       php5-odbc \
       php5-pgsql \
       php5-sqlite \
-      php-aws-sdk \
-      php5-apcu \
-      php5-imagick \
-      php5-intl \
-      php5-memcache \
-      php5-memcached \
-      php5-xsl \
-      liboauth-php \
-      libssh2-php \
-      php5-oauth \
-      php5-gd \
       php5-xmlrpc \
-      php5-dev \
-      php5-mcrypt \
-      mcrypt \
-      php5-mcrypt \
+      php5-xsl \
+      re2c \
       uuid-dev \
       && pecl -q install uuid igbinary \
       && mkdir -p /tmp/apt-get-source/ \
@@ -61,5 +61,4 @@ RUN apt-get autoremove \
       && apt-get autoclean \
       && apt-get clean \
       && rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*
-RUN /etc/init.d/php5-fpm start
 CMD ["/usr/bin/monit", "-I", "-c", "/etc/monit/monitrc"]

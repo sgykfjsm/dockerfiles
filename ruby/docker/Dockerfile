@@ -17,7 +17,6 @@ RUN apt-get -qq update && apt-get -qq -y install \
         libreadline6-dev \
         libssl-dev \
         libyaml-dev \
-        openjdk-7-jdk \
         ruby-dev \
         zlib1g-dev \
       && git clone https://github.com/sstephenson/rbenv.git ${RBENV_ROOT} \
