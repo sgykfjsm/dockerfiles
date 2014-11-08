@@ -53,9 +53,9 @@ set +e
 echo "Run rspec test:"
 ${rake_cmd} spec
 echo
-
-set -e
-
+#
+# set -e
+#
 # echo "Delete container:"
 # for cid in $(${ssh_cmd} ${vagrant_hostname} "${docker_cmd} ps -a -q --no-trunc")
 # do
@@ -66,6 +66,6 @@ set -e
 #         && sudo rm -rf ${docker_share_dir}/${data_container_name} \
 #     "
 # done
-#
+
 rm -f ${ssh_config_to_vagrant}
 exit
