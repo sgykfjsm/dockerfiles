@@ -46,14 +46,13 @@ RUN apt-get -qq update && apt-get -y install \
       && make install
 
 # monit
-ADD etc_monit_conf.d_monit.conf /etc/monit/conf.d/monit.conf
-ADD etc_monit_conf.d_php5fpm.conf /etc/monit/conf.d/php5fpm.conf
+COPY etc/monit/conf.d/monit.conf etc/monit/conf.d/php5fpm.conf /etc/monit/conf.d/
 RUN mkdir -m 755 -p /var/log/monit \
       && sed -i -e "s/%CONTAINER_NAME%/${CONTAINER_NAME}/g" /etc/monit/conf.d/monit.conf
 
 # php
-ADD etc_php5_fpm_php.ini /tmp/php.ini
-ADD etc_php5_fpm_pool.d_www.conf /etc/php5/fpm/pool.d/www.conf
+COPY etc/php5/fpm/php.ini /tmp/php.ini
+COPY etc/php5/fpm/pool.d/www.conf /etc/php5/fpm/pool.d/www.conf
 RUN cat /tmp/php.ini >> /etc/php5/fpm/php.ini && rm -f /tmp/php.ini
 
 # finish
