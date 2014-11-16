@@ -21,8 +21,4 @@ source /etc/bash_completion.d/docker
 echo source /etc/bash_completion.d/docker >> /home/vagrant/.bash_profile
 echo 'DOCKER_OPTS="-H 0.0.0.0:5432"' >> /etc/default/docker
 service docker restart
-sleep 10
-
-docker -H ":5432" run -v /usr/local/bin:/target jpetazzo/nsenter
-docker -H ":5432" pull ubuntu:14.04
 
