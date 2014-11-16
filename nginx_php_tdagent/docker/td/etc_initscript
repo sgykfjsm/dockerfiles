@@ -1,2 +1,0 @@
-ulimit -n 65536
-eval exec "$4"

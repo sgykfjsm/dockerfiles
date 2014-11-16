@@ -3,7 +3,7 @@ MAINTAINER shigeyuki.fujishima_at_gmail.com
 
 # initial setup
 ENV DEBIAN_FRONTEND noninteractive
-ENV CONTAINER_NAME base
+ENV CONTAINER_NAME base_ubuntu
 
 # environment
 RUN locale-gen en_US.UTF-8 \

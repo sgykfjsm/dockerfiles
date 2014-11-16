@@ -69,9 +69,9 @@ describe command("docker -H ':5432' exec openresty openssl sha1 /etc/init.d/ngin
 
 end
 
-describe command("docker -H ':5432' exec openresty openssl stat --printf=%a /etc/init.d/nginx") do
+describe command("docker -H ':5432' exec openresty stat --printf=%a /etc/init.d/nginx") do
 
-  its(:stdout) { should eq 755 }
+  its(:stdout) { should match /755/ }
 
 end
 
