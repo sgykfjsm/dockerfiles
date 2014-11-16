@@ -127,13 +127,9 @@ norikra_start() {
     [ -d "${d}" ] || { mkdir -p "${d}"; echo "${d} is created"; }
   done
 
-  set -x
   rbenv local ${JRUBY_VERSION}
   rbenv rehash
-  #    --outfile=${NORIKRA_DIR}/out/norikra.out \
-  # norikra start --daemonize \
-  # norikra start \
-  exec norikra start --daemonize \
+  norikra start \
      -Xmx${XMX} \
      -Xms${XMS} \
      -Xmn${XMN} \
@@ -142,10 +138,8 @@ norikra_start() {
      --stats=${NORIKRA_DIR}/stats/norikra.json \
      --logdir=${NORIKRA_DIR}/log \
      --outfile=${NORIKRA_DIR}/out/norikra.out \
-     --${NORIKRA_LEVEL}
-     # --${NORIKRA_LEVEL} >> ${NORIKRA_DIR}/out/norikra.out 2>&1
+     --${NORIKRA_LEVEL} >> ${NORIKRA_DIR}/out/norikra.out 2>&1
 
-  set +x
   echo "Please wait for waking up"
   until [ -f "${NORIKRA_PIDFILE}" ]
   do

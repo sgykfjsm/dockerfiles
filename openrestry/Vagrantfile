@@ -15,14 +15,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # The url from where the 'config.vm.box' box will be fetched if it
   # doesn't already exist on the user's system.
   config.vm.box_url = "/Users/sgyk/local/vagrant/box/trusty-trusty-server-cloudimg-amd64-vagrant-disk1.box"
-  # config.vm.box_url = "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box"
   config.cache.auto_detect = true
   config.vm.define :trusty do |t|
     t.vm.hostname = "trusty"
-    t.vm.network :private_network, ip: "192.168.56.104"
+    t.vm.network :private_network, ip: "192.168.56.101"
     t.vm.provider "virtualbox" do |v|
       v.customize ["modifyvm", :id, "--memory", 512]
-      v.name = "docker_td"
+      v.name = "nginx_openrestry"
     end
     # t.vm.synced_folder "share", "/vagrant_data"
     t.vm.provision :shell, :path => "./setup.sh"

@@ -19,20 +19,12 @@ describe "sgykfjsm/td-agent Images" do
     expect(@image.json["Config"]["Env"]).to include("CONTAINER_NAME=td")
   end
 
-  it "should have environmental NORIKRA_DIR" do
-    expect(@image.json["Config"]["Env"]).to include("NORIKRA_DIR=/opt/norikra")
-  end
-
   it "should have environmental PATH" do
-    expect(@image.json["Config"]["Env"]).to include("PATH=/usr/local/rbenv/shims:/usr/local/rbenv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/td-agent/embedded/bin:/opt/td-agent/bin")
+    expect(@image.json["Config"]["Env"]).to include("PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/td-agent/embedded/bin:/opt/td-agent/bin")
   end
 
   it "should expose http port(monit)" do
     expect(@image.json["Config"]["ExposedPorts"].has_key?("2812/tcp")).to be true
-  end
-
-  it "should expose http port(norikra)" do
-    expect(@image.json["Config"]["ExposedPorts"].has_key?("26578/tcp")).to be true
   end
 
 end
@@ -106,18 +98,3 @@ describe command("curl --silent http://localhost:12812") do
   its(:stdout) { should include 'Monit Service Manager' }
 
 end
-
-#------
-
-describe command("curl --silent --head http://localhost:46578 --output /dev/null --write-out '%{http_code}'") do
-
-  its(:stdout) { should eq '200' }
-
-end
-
-describe command("curl --silent http://localhost:46578") do
-
-  its(:stdout) { should include 'Norikra' }
-
-end
-
