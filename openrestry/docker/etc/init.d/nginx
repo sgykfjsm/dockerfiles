@@ -1,0 +1,197 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          nginx
+# Required-Start:    $network $remote_fs $syslog
+# Required-Stop:     $network $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start/Stop nginx bundled in openresty
+# Description:       Yet Another nginx script in /etc/init.d
+### END INIT INFO
+
+# Author: shigeyuki fujishima <shigeyuki.fujishima_at_gmail.com>
+#
+
+# Do NOT "set -e"
+
+# PATH should only include /usr/* if it runs after the mountnfs.sh script
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/usr/sbin:/bin:/usr/bin
+DESC="nginx"
+NAME=nginx
+CONFFILE=/etc/${NAME}/${NAME}.conf
+NGINX_CMD=$(which ${NAME})
+NGINX_CMD_ARGS="-c ${CONFFILE}"
+PIDFILE=/var/run/$NAME/$NAME.pid
+SCRIPTNAME=/etc/init.d/$NAME
+
+# Exit if the package is not installed
+[ -x "$NGINX_CMD" ] || {
+    echo ${NGINX_CMD} is not excutable. >&2
+    exit 1
+}
+
+[ -r "${CONFFILE}" ] || {
+    echo ${CONFFILE} is not readable. >&2
+    exit 1
+}
+
+# Read configuration variable file if it is present
+[ -r /etc/default/$NAME ] && . /etc/default/$NAME
+
+# Load the VERBOSE setting and other rcS variables
+# . /lib/init/vars.sh
+VERBOSE=yes
+
+# Define LSB log_* functions.
+# Depend on lsb-base (>= 3.2-14) to ensure that this file is present
+# and status_of_proc is working.
+. /lib/lsb/init-functions
+
+RUNNING_STATUS=$(test -f ${PIDFILE}; echo $?)
+#
+# Function that starts the daemon/service
+#
+do_start()
+{
+    is_reload=
+    if [ -f ${PIDFILE} ]; then
+        echo ${PIDFILE} is found. >&2
+        if ps -ef | grep -q $(cat ${PIDFILE}) ; then
+            echo ${NAME} is running. >&2
+        else
+            echo But, ${NAME} process:$(cat ${PIDFILE}) is not found. >&2
+        fi
+        is_reload=yes
+    else
+        if ps -ef | grep -q "${NGINX_CMD}" ; then
+            echo ${NAME} is running. >&2
+            is_reload=yes
+        fi
+    fi
+
+    if [ "${is_reload}" = "yes" ]; then
+            echo Reload ${CONFFILE} ...
+            do_reload || return 1
+    fi
+
+    do_configtest -q || return 1
+    ${NGINX_CMD} ${NGINX_CMD_ARGS} || return 1
+}
+
+#
+# Function that stops the daemon/service
+#
+do_stop()
+{
+    [ -f ${PIDFILE} ] || {
+        echo ${PIDFILE} is not found. >&2
+        if ps -ef | grep -q "${NGINX_CMD}" ; then
+            echo But, Maybe ${NAME} process is running. >&2
+        else
+            echo ${NAME} process has been stopped. >&2
+            echo Bye >&2
+            return 0
+        fi
+    }
+
+    $NGINX_CMD -s stop
+    RETVAL="$?"
+    [ "$RETVAL" = 2 ] && return 2
+    # Many daemons don't delete their pidfiles when they exit.
+    rm -f $PIDFILE
+    return "$RETVAL"
+}
+
+#
+# Function that sends a SIGHUP to the daemon/service
+#
+do_reload() {
+    do_configtest -q || return 1
+    #
+    # If the daemon can reload its configuration without
+    # restarting (for example, when it is sent a SIGHUP),
+    # then implement that here.
+    #
+    ${NGINX_CMD} -s reload
+    return 0
+}
+
+do_configtest() {
+    if [ "$#" -ne 0 ]; then
+        case "$1" in
+            -q)
+                FLAG=$1
+                ;;
+            *)
+                ;;
+        esac
+        shift
+    fi
+    $NGINX_CMD -t ${NGINX_CMD_ARGS}
+    RETVAL="$?"
+    return $RETVAL
+}
+
+
+case "$1" in
+  start)
+    [ "$VERBOSE" != no ] && log_daemon_msg "Starting $DESC" "$NAME"
+    do_start
+    case "$?" in
+        0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
+        2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
+    esac
+    ;;
+  stop)
+    [ "$VERBOSE" != no ] && log_daemon_msg "Stopping $DESC" "$NAME"
+    do_stop
+    case "$?" in
+        0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
+        2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
+    esac
+    ;;
+  status)
+    status_of_proc "$NGINX_CMD" "$NAME" && exit 0 || exit $?
+    ;;
+  reload|force-reload)
+    #
+    # If do_reload() is not implemented then leave this commented out
+    # and leave 'force-reload' as an alias for 'restart'.
+    #
+    log_daemon_msg "Reloading $DESC" "$NAME"
+    do_reload
+    log_end_msg $?
+    ;;
+  restart|force-reload)
+    #
+    # If the "reload" option is implemented then remove the
+    # 'force-reload' alias
+    #
+    log_daemon_msg "Restarting $DESC" "$NAME"
+    do_stop
+    case "$?" in
+      0|1)
+        do_start
+        case "$?" in
+            0) log_end_msg 0 ;;
+            1) log_end_msg 1 ;; # Old process is still running
+            *) log_end_msg 1 ;; # Failed to start
+        esac
+        ;;
+      *)
+        # Failed to stop
+        log_end_msg 1
+        ;;
+    esac
+    ;;
+    configtest)
+        do_configtest
+        ;;
+  *)
+    #echo "Usage: $SCRIPTNAME {start|stop|restart|reload|force-reload}" >&2
+    echo "Usage: $SCRIPTNAME {start|stop|status|restart|force-reload|configtest}" >&2
+    exit 3
+    ;;
+esac
+
+:

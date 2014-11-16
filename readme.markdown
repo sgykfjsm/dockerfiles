@@ -10,18 +10,25 @@ Mac --> ssh --> Vagrant(ubuntu) --> docker exec by serverspec --> docker-contain
 
 ## Includings
 
-- Rakefile
-- Vagrantfile
-  - vagrant configuration
-- do\_spec.sh
-  - execute test
-- docker/
-  - docker files
-- readme.markdown
-- setup.sh
-  - provisioning script for Vagarnt
-- spec/
-  - spec files for serverspec
+- base
+  - simple Ubuntu Image
+- jruby
+  - include jruby-1.7.16 and rbenv on sgykfjsm/base\_ubuntu
+- nginx\_php
+  - include nginx + php5-fpm on sgykfjsm/php5fpm
+- nginx\_simple
+  - include nginx on sgykfjsm/base
+- norikra
+  - include [norikra](http://norikra.github.io/) on sgykfjsm/jruby
+- openrestry
+  - include [openresty](http://openresty.org/) on sgykfjsm/base\_ubuntu
+- php5fpm
+  - include php5-fpm on sgykfjsm/base\_ubuntu
+- ruby
+  - include ruby 2.1.4 on sgykfjsm/base\_ubuntu
+- td-agent
+  - include td-agent on sgykfjsm/base\_ubuntu
+
 
 ## setup
 

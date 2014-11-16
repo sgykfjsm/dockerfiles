@@ -1,0 +1,71 @@
+#!/bin/bash
+
+set -eu
+
+#
+vagrant_cmd=$(which vagrant)
+vagrant_hostname=docker_tdd
+
+#
+ssh_cmd=$(which ssh)
+ssh_config_to_vagrant=$(pwd)/.ssh_config
+${vagrant_cmd} ssh-config --host ${vagrant_hostname} > ${ssh_config_to_vagrant}
+ssh_opts="-F ${ssh_config_to_vagrant} -q"
+ssh_cmd="${ssh_cmd} ${ssh_opts}"
+
+#
+docker_cmd=$(ssh -F ${ssh_config_to_vagrant} docker_tdd 'which docker')
+docker_opts="-H :5432"
+docker_cmd="${docker_cmd} ${docker_opts}"
+docker_share_dir=/opt/docker # on docker host
+docker_repository_name=sgykfjsm
+container_name=base_ubuntu
+
+#
+rake_cmd=$(which rake)
+
+echo "Initialize:"
+for cid in $(${ssh_cmd} ${vagrant_hostname} "${docker_cmd} ps -a -q --no-trunc")
+do
+    echo ${cid}
+    ${ssh_cmd} ${vagrant_hostname} " \
+        ${docker_cmd} stop ${cid} > /dev/null \
+        && ${docker_cmd} rm ${cid} > /dev/null \
+    "
+done
+
+echo "Build docker image(${container_name}):"
+${ssh_cmd} ${vagrant_hostname} \
+    "${docker_cmd} build -t ${docker_repository_name}/${container_name} /vagrant/docker/."
+echo
+
+echo "Run container:"
+${ssh_cmd} ${vagrant_hostname} "\
+    ${docker_cmd} run -i -d -t -P \
+        --name ${container_name} \
+        -v /etc/localtime:/etc/localtime:ro \
+        ${docker_repository_name}/${container_name} \
+"
+
+sleep 10
+
+set +e
+echo "Run rspec test:"
+${rake_cmd} spec
+echo
+
+set -e
+
+echo "Delete container:"
+for cid in $(${ssh_cmd} ${vagrant_hostname} "${docker_cmd} ps -a -q --no-trunc")
+do
+    echo ${cid}
+    ${ssh_cmd} ${vagrant_hostname} " \
+        ${docker_cmd} stop ${cid} > /dev/null \
+        && ${docker_cmd} rm ${cid} > /dev/null \
+        && sudo rm -rf ${docker_share_dir}/${data_container_name} \
+    "
+done
+
+rm -f ${ssh_config_to_vagrant}
+exit
