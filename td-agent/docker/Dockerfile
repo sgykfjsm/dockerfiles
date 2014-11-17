@@ -10,8 +10,7 @@ EXPOSE 2812 24220 8888 24224 24230
 
 # monit
 RUN apt-get -qq update && apt-get -qq -y install build-essential curl monit
-COPY etc/monit/conf.d/monit.conf etc/monit/conf.d/td.conf \
-       etc/monit/conf.d/norikra.conf /etc/monit/conf.d/
+COPY etc/monit/conf.d/monit.conf etc/monit/conf.d/td.conf /etc/monit/conf.d/
 RUN mkdir -m 755 -p /var/log/monit \
       && sed -i -e "s/%CONTAINER_NAME%/${CONTAINER_NAME}/g" /etc/monit/conf.d/monit.conf
 
