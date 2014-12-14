@@ -2,6 +2,7 @@
 
 set -eu
 
+unset DOCKER_CERT_PATH
 #
 vagrant_cmd=$(which vagrant)
 vagrant_hostname=docker_tdd

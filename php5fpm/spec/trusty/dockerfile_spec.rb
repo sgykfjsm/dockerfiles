@@ -5,6 +5,7 @@ describe "sgykfjsm/php5fpm Images" do
 
   before(:all) do
       @image = Docker::Image.all.find {|image|
+        puts image
         @i = image.info["RepoTags"].find { |tag|
           tag == "sgykfjsm/php5fpm:latest"
         }

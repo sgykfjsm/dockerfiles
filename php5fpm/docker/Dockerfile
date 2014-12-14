@@ -5,7 +5,7 @@ MAINTAINER shigeyuki.fujishima_at_gmail.com
 ENV CONTAINER_NAME php5fpm
 
 # networking
-EXPOSE 2812
+EXPOSE 80 2812
 
 # install
 RUN apt-get -qq update && apt-get -y install \
