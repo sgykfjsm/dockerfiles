@@ -25,7 +25,6 @@ RUN rm -rf /etc/nginx/sites-available /usr/share/nginx/html \
 COPY etc/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY etc/nginx/sites-available/default /etc/nginx/sites-available/default
 COPY usr/share/nginx/html/index.html usr/share/nginx/html/index.php /usr/share/nginx/html/
-RUN sed -i -e "s/%CONTAINER_NAME%/${CONTAINER_NAME}/g" /etc/nginx/sites-available/default
 
 # finish
 RUN apt-get autoremove \

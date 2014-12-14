@@ -80,10 +80,9 @@ describe command("docker -H ':5432' exec nginx_php5fpm test -f /etc/nginx/sites-
 
 end
 
-# sed -e 's/%CONTAINER_NAME%/nginx_php5fpm/g' docker/etc_nginx_sites-available_default | openssl sha1 | awk '{print $NF}'
 describe command("docker -H ':5432' exec nginx_php5fpm openssl sha1 /etc/nginx/sites-available/default | awk '{print $NF}'") do
 
-  its(:stdout) { should match /^be4c82f31ea32ac5124a6653e44bd3a8702a6288$/}
+  its(:stdout) { should match /^608cca4a35d3912894252024bad8dbef11cab484$/}
 
 end
 
