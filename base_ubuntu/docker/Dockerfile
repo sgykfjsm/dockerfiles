@@ -18,7 +18,8 @@ COPY etc/initscript /etc/initscript
 
 #
 RUN echo "nameserver 8.8.8.8" >> /etc/resolvconf/resolv.conf.d/base \
-    && echo "UTC" | sudo tee /etc/timezone \
+    && echo "UTC" > /etc/timezone \
+    && ln -sf /usr/share/zoneinfo/UTC /etc/localtime \
     && dpkg-reconfigure --frontend noninteractive tzdata \
     && apt-get -qq update && apt-get -qq -y upgrade \
     && apt-get autoremove \
