@@ -1,0 +1,21 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.box = "centos67"
+  config.vm.box_url = "/Users/sgyk/local/vagrant/packer/packer-vanilla-box/centos/6/artifacts/centos67-x64-virtualbox.box"
+  config.cache.auto_detect = true
+  config.vm.provision "shell", path: "setup.sh"
+
+  config.vm.define :centos67 do |centos67|
+    centos67.vm.hostname = "centos67"
+    centos67.vm.network :private_network, ip: "192.168.56.201"
+    centos67.vm.provider "virtualbox" do |v|
+      v.customize ["modifyvm", :id, "--memory", 2048]
+      v.name = "centos67"
+    end
+  end
+
+end

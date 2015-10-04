@@ -84,15 +84,15 @@ build_image
 echo "$(date '+%FT%T.%Z') Run container:"
 run_container
 
-sleep 10
-
-set +e
-echo "$(date '+%FT%T.%Z') Run rspec test:"
-${rake_cmd} spec
-
-set -e
-
-echo "$(date '+%FT%T.%Z') CleanUp"
-cleanup
+# sleep 10
+#
+# set +e
+# echo "$(date '+%FT%T.%Z') Run rspec test:"
+# ${rake_cmd} spec
+#
+# set -e
+#
+# echo "$(date '+%FT%T.%Z') CleanUp"
+# cleanup
 
 exit
